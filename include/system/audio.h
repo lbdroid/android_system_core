@@ -70,6 +70,7 @@ typedef enum {
 #ifdef QCOM_HARDWARE
     AUDIO_STREAM_INCALL_MUSIC     = 10,
 #endif
+
     AUDIO_STREAM_CNT,
     AUDIO_STREAM_MAX              = AUDIO_STREAM_CNT - 1,
 } audio_stream_type_t;
@@ -343,6 +344,7 @@ typedef enum {
                                         AUDIO_FORMAT_PCM_SUB_16_BIT),
     AUDIO_FORMAT_PCM_24_BIT_OFFLOAD  = (AUDIO_FORMAT_PCM_OFFLOAD |
                                         AUDIO_FORMAT_PCM_SUB_8_24_BIT),
+
 } audio_format_t;
 
 /* For the channel mask for position assignment representation */

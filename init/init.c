@@ -579,7 +579,7 @@ static int wait_for_coldboot_done_action(int nargs, char **args)
 {
     int ret;
     INFO("wait for %s\n", coldboot_done);
-    ret = wait_for_file(coldboot_done, COMMAND_RETRY_TIMEOUT);
+    ret = wait_for_file(coldboot_done, COLDBOOT_RETRY_TIMEOUT);
     if (ret)
         ERROR("Timed out waiting for %s\n", coldboot_done);
     return ret;
@@ -1016,6 +1016,7 @@ int main(int argc, char **argv)
     int signal_fd_init = 0;
     int keychord_fd_init = 0;
     bool is_charger = false;
+    bool is_ffbm = false;
 
     if (!strcmp(basename(argv[0]), "ueventd"))
         return ueventd_main(argc, argv);
@@ -1075,7 +1076,9 @@ int main(int argc, char **argv)
     restorecon("/dev/__properties__");
     restorecon_recursive("/sys");
 
-    is_charger = !strcmp(bootmode, "charger");
+    is_ffbm = !strncmp(bootmode, "ffbm", 4);
+    if (!is_ffbm)
+        is_charger = !strcmp(bootmode, "charger");
 
     INFO("property init\n");
     property_load_boot_defaults();
@@ -1104,9 +1107,12 @@ int main(int argc, char **argv)
     if (is_charger) {
         action_for_each_trigger("charger", action_add_queue_tail);
     } else {
-        action_for_each_trigger("late-init", action_add_queue_tail);
+        if (is_ffbm) {
+            action_for_each_trigger("ffbm", action_add_queue_tail);
+        } else {
+            action_for_each_trigger("late-init", action_add_queue_tail);
+        }
     }
-
     /* run all property triggers based on current state of the properties */
     queue_builtin_action(queue_property_triggers_action, "queue_property_triggers");
 
